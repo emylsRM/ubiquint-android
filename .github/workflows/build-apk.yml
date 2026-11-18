@@ -1,0 +1,65 @@
+name: Build APK privato
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionCode:
+        description: 'Version code (intero crescente, es. 2)'
+        required: true
+        default: '1'
+      versionName:
+        description: 'Version name (es. 1.0.1)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installa Bubblewrap
+        run: npm i -g @bubblewrap/cli
+
+      - name: Configura Bubblewrap (JDK + SDK)
+        run: |
+          mkdir -p ~/.bubblewrap
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_SDK_ROOT\"}" > ~/.bubblewrap/config.json
+
+      - name: Imposta versione
+        run: |
+          jq --argjson c ${{ inputs.versionCode }} --arg n "${{ inputs.versionName }}" \
+            '.appVersionCode=$c | .appVersionName=$n | .appVersion=$n' twa-manifest.json > t.json && mv t.json twa-manifest.json
+
+      - name: Ripristina keystore dai Secrets
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android.keystore
+
+      - name: Genera progetto Android
+        run: yes | bubblewrap update --skipVersionUpgrade
+
+      - name: Compila e firma APK
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: bubblewrap build --skipPwaValidation
+
+      - name: Pulisci keystore
+        if: always()
+        run: rm -f android.keystore
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ubiquint-apk-${{ inputs.versionName }}
+          path: app-release-signed.apk
+          retention-days: 30
