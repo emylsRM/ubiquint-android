@@ -1,0 +1,14 @@
+# UBIQUINT V26 — intestazioni di sicurezza per Cloudflare Pages (file "_headers" nella radice del sito)
+# connect-src resta "https:" perché motori, proxy e Worker sono indirizzi che scegli tu nelle impostazioni.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https:; frame-src https://*.firebaseapp.com https://accounts.google.com; worker-src 'self' blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+
+# UBIQUINT per Android: pagina di accesso aperta dall'app nel browser (non va in cache né nei motori di ricerca)
+/android-login*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#02040A</color>
+    <color name="gold">#C9A227</color>
+    <color name="icon_bg">#0B0818</color>
+
+    <!-- Tema scuro come la web app: niente lampo bianco all'avvio, barre di sistema nel colore di fondo -->
+    <style name="Ubq" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:colorPrimary">@color/bg</item>
+        <item name="android:colorPrimaryDark">@color/bg</item>
+        <item name="android:colorAccent">@color/gold</item>
+    </style>
+
+    <style name="UbqDialog" parent="@android:style/Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">@color/gold</item>
+    </style>
+</resources>
