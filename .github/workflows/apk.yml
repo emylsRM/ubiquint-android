@@ -22,12 +22,21 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # i pacchetti (31 MB) restano in cache: il mirror Ubuntu dei runner a volte scarica a pochi KB/s
+      - name: Cache dei pacchetti Android
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/apt-ubq
+          key: apt-ubq-${{ runner.os }}-noble-v1
+
       - name: Strumenti Android (pacchetti Ubuntu, come in build.sh)
-        # prima con gli indici già presenti sul runner (pochi secondi); solo se mancano si aggiornano
         run: |
           PKG="android-sdk-platform-23 aapt dalvik-exchange zipalign apksigner dexdump"
-          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 $PKG \
-            || { sudo apt-get update -o Acquire::Retries=3 && sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 $PKG; }
+          C="$HOME/.cache/apt-ubq"; mkdir -p "$C/partial"
+          OPT="-o Dir::Cache::Archives=$C -o APT::Keep-Downloaded-Packages=true -o Acquire::Retries=3"
+          sudo apt-get install -y --no-install-recommends $OPT $PKG \
+            || { sudo apt-get update -o Acquire::Retries=3 && sudo apt-get install -y --no-install-recommends $OPT $PKG; }
+          sudo rm -f "$C/lock"; sudo chown -R "$(id -u):$(id -g)" "$C"; du -sh "$C"
 
       # Secrets UBQ_* (README); valgono anche i nomi della vecchia configurazione TWA (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS)
       - name: Chiave di firma dai secrets
