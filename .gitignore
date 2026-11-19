@@ -1,7 +1,9 @@
+build/
+.keystore/
 *.keystore
 *.jks
+*.p12
 *.apk
-*.aab
-app/
-build/
-.gradle/
+*.idsig
+__pycache__/
+node_modules/

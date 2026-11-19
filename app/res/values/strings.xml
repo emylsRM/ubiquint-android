@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UBIQUINT</string>
+    <string name="offline_title">Connessione non disponibile</string>
+    <string name="offline_hint">Controlla la connessione e tocca Riprova.</string>
+    <string name="retry">Riprova</string>
+    <string name="login_in_browser">Completa l\'accesso con Google nel browser: poi torni qui da solo.</string>
+    <string name="no_browser">Per accedere con Google serve un browser (Chrome, Firefox, Samsung Internet…).</string>
+    <string name="login_invalid">Accesso non valido o scaduto. Tocca di nuovo «Accedi con Google» nell\'app.</string>
+    <string name="saved_title">File salvato</string>
+    <string name="saved_downloads">Download/UBIQUINT/%1$s</string>
+    <string name="open">Apri</string>
+    <string name="share">Condividi</string>
+    <string name="close">Chiudi</string>
+    <string name="save_failed">Salvataggio non riuscito.</string>
+    <string name="file_too_big">File troppo grande da salvare (oltre 64 MB).</string>
+    <string name="no_app">Nessuna app installata può aprire questo collegamento o file.</string>
+    <string name="redirect_blocked">L\'indirizzo dell\'app porta a %1$s, che non è l\'app UBIQUINT. Controlla APP_URL in app.properties e ricrea l\'APK.</string>
+    <string name="print_job">UBIQUINT report</string>
+</resources>
