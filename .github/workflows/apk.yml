@@ -13,18 +13,21 @@ permissions:
 jobs:
   apk:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Strumenti Android (pacchetti Ubuntu, come in build.sh)
+        # prima con gli indici già presenti sul runner (pochi secondi); solo se mancano si aggiornano
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq android-sdk-platform-23 aapt dalvik-exchange zipalign apksigner
+          PKG="android-sdk-platform-23 aapt dalvik-exchange zipalign apksigner dexdump"
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 $PKG \
+            || { sudo apt-get update -o Acquire::Retries=3 && sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 $PKG; }
 
       # Secrets UBQ_* (README); valgono anche i nomi della vecchia configurazione TWA (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS)
       - name: Chiave di firma dai secrets
@@ -48,7 +51,19 @@ jobs:
       - name: Prove delle regole dell'app (JVM)
         run: bash test/run_tests.sh
 
-      - uses: actions/upload-artifact@v4
+      - name: Verifica dell'APK
+        run: |
+          APK=$(ls build/UBIQUINT-*.apk)
+          aapt dump badging "$APK" | grep -E "^(package|sdkVersion|targetSdkVersion|uses-permission|launchable)"
+          zipalign -c -p 4 "$APK" && echo "allineamento a 4 byte: OK"
+          apksigner verify -v --min-sdk-version 24 "$APK" | grep -E "v2|v3|signers"
+          apksigner verify --print-certs "$APK" | grep -E "DN|SHA-256"
+          unzip -p "$APK" classes.dex > "$RUNNER_TEMP/classes.dex"
+          N=$(dexdump -a "$RUNNER_TEMP/classes.dex" | grep -c 'Landroid/webkit/JavascriptInterface;')
+          echo "metodi @JavascriptInterface: $N"; [ "$N" -eq 5 ]
+          sha256sum "$APK"
+
+      - uses: actions/upload-artifact@v5
         with:
           name: UBIQUINT-apk
           path: build/UBIQUINT-*.apk
